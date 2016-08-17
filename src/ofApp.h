@@ -29,6 +29,7 @@ class ofApp : public ofBaseApp{
     
         ofxDatGui* gui;
         ofxDatGuiSlider* ampSlider;
+        ofxDatGuiSlider* ampYSlider;
         ofxDatGuiSlider* waveSlider;
         bool save;
         bool drawLines;

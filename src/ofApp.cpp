@@ -2,21 +2,22 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    w = 834;
-    h = 969;
+    img.load("images/palm.jpg");
+    w = img.getWidth();
+    h = img.getHeight();
     
     ofSetWindowShape(w, h);
-    
+    ofSetFrameRate(30);
     
     baseShader.load("shaders/base");
     sinShader.load("shaders/base.vert","shaders/sin.frag");
     contourShader.load("shaders/base.vert", "shaders/contour.frag");
     fbo.allocate(w, h, GL_RGBA);
     
-    img.load("images/beach.jpg");
-    marker.load("images/marker.png");
-    leafs.load("images/island.jpg");
-    water.load("images/water.jpg");
+    
+//    marker.load("images/marker.png");
+//      .load("images/island.jpg");
+//    water.load("images/water.jpg");
     
     img.resize(w, h);
     
@@ -26,22 +27,29 @@ void ofApp::setup(){
     
     gui = new ofxDatGui( ofxDatGuiAnchor::TOP_LEFT);
     
-    ampSlider = gui->addSlider("Amp", 0.001, 0.2,0.05);
+    ampSlider = gui->addSlider("Amp", 0.001, 1.0,0.05);
     ampSlider->setPrecision(4);
-    waveSlider = gui->addSlider("Wave", 0.001, 500,5);
+
+    waveSlider = gui->addSlider("Wave", 0.001, 20,5);
+    waveSlider->setPrecision(4);
+    
+    ampYSlider = gui->addSlider("AmpY", 0.001, 0.6,0.05);
+    ampYSlider->setPrecision(4);
     
     save = false;
     drawLines = false;
     hideGui = true;
+    
+//    img.getTexture().setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    if(save){
+    if(save && ofGetFrameNum() % 5 == 0){
         ofPixels savepix;
         fbo.readToPixels(savepix);
         ofSaveImage(savepix, "saved/"+ofGetTimestampString()+".png");
-        save = false;
+//        save = false;
     }
 }
 
@@ -50,9 +58,11 @@ void ofApp::draw(){
     fbo.begin();
         sinShader.begin();
             sinShader.setUniformTexture("u_image", img.getTexture(), 0);
-            sinShader.setUniformTexture("img2", leafs.getTexture(), 1);
+//            sinShader.setUniformTexture("img2", leafs.getTexture(), 1);
             sinShader.setUniform1f("time", ofGetFrameNum()*0.05 );
+            sinShader.setUniform2f("res", w, h);
             sinShader.setUniform1f("amp", ampSlider->getValue());
+            sinShader.setUniform1f("ampY", ampYSlider->getValue());
             sinShader.setUniform1f("wavelength", waveSlider->getValue());
                 img.draw(0,0);
         sinShader.end();
@@ -115,6 +125,10 @@ void ofApp::drawOnImage(){
 void ofApp::keyPressed(int key){
     if(key == 's'){
         save = !save;
+    }
+    
+    if(key == 'S'){
+        save = false;
     }
     
     if(key == 'h'){
